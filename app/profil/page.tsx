@@ -1,6 +1,10 @@
 // app/profil/page.tsx
 
-const kullanici = {
+"use client";
+
+import { useEffect, useState } from "react";
+
+const defaultKullanici = {
   isim: "Ahmet Yılmaz",
   email: "ahmet@example.com",
   rol: "Eğitmen",
@@ -11,7 +15,34 @@ const kullanici = {
   ],
 };
 
+type AktifKullanici = {
+  ad?: string;
+  email?: string;
+  rol?: string;
+};
+
 export default function ProfilSayfasi() {
+  const [aktif, setAktif] = useState<AktifKullanici | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("aktifKullanici");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setAktif(parsed);
+        return;
+      }
+    } catch {
+      // ignore
+    }
+
+    setAktif(null);
+  }, []);
+
+  const displayName = (aktif?.ad && String(aktif.ad).trim()) || defaultKullanici.isim;
+  const displayEmail = (aktif?.email && String(aktif.email).trim()) || defaultKullanici.email;
+  const initial = (displayName && displayName.charAt(0)) || "U";
+
   return (
     <main style={{ maxWidth: "700px", margin: "60px auto", padding: "0 24px" }}>
       {/* Üst kısım — kullanıcı bilgisi */}
@@ -30,11 +61,11 @@ export default function ProfilSayfasi() {
             flexShrink: 0,
           }}
         >
-          {kullanici.isim.charAt(0)}
+          {initial}
         </div>
         <div>
-          <h1 style={{ fontSize: "1.5rem", margin: 0 }}>{kullanici.isim}</h1>
-          <p style={{ color: "#777", margin: "4px 0" }}>{kullanici.email}</p>
+          <h1 style={{ fontSize: "1.5rem", margin: 0 }}>{displayName}</h1>
+          <p style={{ color: "#777", margin: "4px 0" }}>{displayEmail}</p>
           <span
             style={{
               display: "inline-block",
@@ -45,7 +76,7 @@ export default function ProfilSayfasi() {
               borderRadius: "999px",
             }}
           >
-            {kullanici.rol}
+            {defaultKullanici.rol}
           </span>
         </div>
       </div>
@@ -53,7 +84,7 @@ export default function ProfilSayfasi() {
       {/* Kurslarım */}
       <h2 style={{ fontSize: "1.1rem", marginBottom: "16px" }}>Kurslarım</h2>
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-        {kullanici.kurslar.map((kurs) => (
+        {defaultKullanici.kurslar.map((kurs) => (
           <div
             key={kurs.id}
             style={{
